@@ -4,13 +4,8 @@ from uuid import uuid4
 
 class Author(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, default=uuid4, unique=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        related_name='author_profile',
-        unique=True 
-    )
     name = models.CharField(max_length=255)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, name="user", null=True)
     biography = models.TextField()
-    birth_date = models.DateField()
+    birth_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=20)

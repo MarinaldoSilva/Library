@@ -14,14 +14,15 @@ class BookListCreateAPIView(generics.ListCreateAPIView):
 
         if user.is_superuser or user.is_staff:
             return Book.objects.all()
-        return Book.objects.filter(author__user=user)
+        return Book.objects.filter(author=user)
     
     def perform_create(self, serializer):   
         print(self.request)
         try:
-            instance_author = Author.objects.get(user=self.request.user)
+            instance_author = Author.objects.get(name=self.request.user)
         except Author.DoesNotExist:
             raise serializers.ValidationError({"error":"Autor não encontrado."})
+        serializer.save(author=instance_author)
 
 
 class BookRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):

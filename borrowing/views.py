@@ -9,7 +9,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingSerializer
     filter_backends = [DjangoFilterBackend]
 
-    filter_fields = ['user','book', 'borrow_date', 'return_date'], 
+    filter_fields = ['user','book', 'borrow_date', 'return_date']
 
     def get_queryset(self):
         user = self.request.user
