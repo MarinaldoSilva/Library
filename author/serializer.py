@@ -1,16 +1,16 @@
-from .models import Author
 from rest_framework import serializers
-
+from .models import Author
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
-        fields = ('id', 'user', 'name', 'biography', 'birth_date', 'nationality')
+        fields = "__all__"
 
         read_only_fields = ['id']
-
+        
         extra_kwargs = {
-            'user':{
-                'required':False
+            'user': {
+                'write_only': True,  
+                'required': False
             }
         }
