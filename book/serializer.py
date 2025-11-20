@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from .models import Book
+
 from author.models import Author
+
+from .models import Book
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -11,8 +13,8 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
-    
-    author_data = AuthorSerializer(source='author',read_only=True)
+
+    author_data = AuthorSerializer(source="author", read_only=True)
 
     class Meta:
         model = Book
@@ -22,6 +24,6 @@ class BookSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return super().create(validated_data)
-    
+
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)

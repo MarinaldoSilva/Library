@@ -1,9 +1,9 @@
-from .views import SingupAPIView, SingInAPIView, SingOutAPIView
-from django.urls import path, URLPattern
+from django.urls import URLPattern, path
 
+from .views import SingInAPIView, SingOutAPIView, SingupAPIView
 
-urlpatterns:URLPattern = [
+urlpatterns: URLPattern = [
     path("register/", SingupAPIView.as_view(), name="register"),
     path("login/", SingInAPIView.as_view(), name="login"),
-    path("logout/", SingOutAPIView.as_view(), name="logout")
+    path("logout/", SingOutAPIView.as_view(), name="logout"),
 ]

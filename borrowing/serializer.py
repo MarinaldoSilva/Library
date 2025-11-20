@@ -1,5 +1,6 @@
-from .models import Borrowing
 from rest_framework import serializers
+
+from .models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -7,4 +8,4 @@ class BorrowingSerializer(serializers.ModelSerializer):
         model = Borrowing
         fields = "__all__"
 
-        read_only_fields = ['id','user', 'borrow_date']
+        read_only_fields = ["id", "user", "borrow_date"]

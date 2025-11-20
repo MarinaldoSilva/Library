@@ -1,20 +1,32 @@
-from .models import User
 from rest_framework import serializers
-from django.contrib.auth.hashers import make_password
+
+from .models import User
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("email","birth_date","username","password","first_name","last_name","full_name", "created_at", "updated_at", "status")
-        read_only_fields = ("id", "created_at", "updated_at")#apenas visualização
+        fields = (
+            "email",
+            "birth_date",
+            "username",
+            "password",
+            "first_name",
+            "last_name",
+            "full_name",
+            "created_at",
+            "updated_at",
+            "status",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")  # apenas visualização
 
         extra_kwargs = {
-            'password': {
-                'write_only':True,
+            "password": {
+                "write_only": True,
             }
         }
 
-    def create(self, validated_data)->User:
+    def create(self, validated_data) -> User:
         new_user = User.objects.create_user(**validated_data)
         return new_user
 

@@ -1,8 +1,10 @@
-from rest_framework import viewsets, serializers
-from author.serializer import AuthorSerializer
-from author.models import Author
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import serializers, viewsets
 from rest_framework.permissions import IsAuthenticated
+
+from author.models import Author
+from author.serializer import AuthorSerializer
+
 
 class AuthorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
