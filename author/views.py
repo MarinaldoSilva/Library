@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from author.serializer import AuthorSerializer
 from author.models import Author
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,8 +19,8 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return Author.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        author = Author.objects.filter(user=self.request.user).exists()
-        if author:
-            raise Exception("Author já cadastrado")
+        author = Author.objects.filter(name=self.request.data.get('name')).exists()
+        if not author:
+            raise serializers.ValidationError("Autor não localizado")
         return serializer.save(user=self.request.user)
     

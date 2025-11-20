@@ -27,3 +27,4 @@ class Book(models.Model):
     language = models.CharField(max_length=20)
     cover_url = models.URLField(max_length=300, blank=True, null=True, verbose_name="link da capa")
     status = models.CharField(choices=STATUS_TYPES, default="AVAILABLE")
+    estoque = models.PositiveIntegerField(blank=True)
