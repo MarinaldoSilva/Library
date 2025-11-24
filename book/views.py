@@ -15,6 +15,25 @@ class BookListAPIView(APIView):
     @extend_schema(summary="Listar Livros", description="Lista os livros. Admins veem todos; usuários também podem ver todos ou aplicar filtros no cliente.", responses={200: BookSerializer(many=True)})
     def get(self, request):
         queryset = Book.objects.all()
+
+        category = request.query_params.get('category')
+        author_name = request.query_params.get('auhtor')
+        status_param = request.query_params.get('status')
+        ordering = request.query_params.get('ordering')
+
+        if category:
+            queryset = queryset.filter(category__icontains=category)
+        
+        if author_name:
+            queryset = queryset.filter(author_name__icontains=author_name)
+        
+        if status_param:
+            queryset = queryset.filter(status_param__icontains=status_param)
+
+        search_validated = ['titule', 'publication_date', 'author_name']
+        if ordering in search_validated:
+            queryset = queryset.order_by(ordering)
+
         serializer = BookSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
