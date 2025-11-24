@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound

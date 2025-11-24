@@ -21,7 +21,7 @@ class BorrowingTests(APITestCase):
 
         self.author = Author.objects.create(name="Sheldon Cupper", nationality="BR")
 
-        self.book = Book.objects.create(title=" BIG BANG", isbn="1234567890", page_count=100, author=self.author, status="AVAILABLE", last_edition="2023-01-01", estoque=1)
+        self.book = Book.objects.create(title=" BIG BANG", ISBN="1234567890", page_count=100, author=self.author, status="AVAILABLE", last_edition="2023-01-01", estoque=1)
 
         self.url = reverse("borrowing-create")
 
@@ -55,7 +55,7 @@ class BorrowingTests(APITestCase):
 
     def test_limite_de_5_livros(self):
         for i in range(5):
-            livro_extra = Book.objects.create(title=f"Livro {i}", isbn=f"111{i}", page_count=100, author=self.author, status="AVAILABLE", last_edition="2023-01-01", estoque=1)
+            livro_extra = Book.objects.create(title=f"Livro {i}", ISBN=f"111{i}", page_count=100, author=self.author, status="AVAILABLE", last_edition="2023-01-01", estoque=1)
             Borrowing.objects.create(user=self.user, book=livro_extra, return_date=date.today() + timedelta(days=5))
 
         data = {"book": self.book.id, "return_date": date.today() + timedelta(days=7)}
