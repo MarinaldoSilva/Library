@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from datetime import timedelta
 
-from .serializer import Borrowing, BorrowingSerializer
+from .serializer import BorrowingSerializer
+from .models import Borrowing
 
 
 class BorrowingListAPIView(APIView):

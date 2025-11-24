@@ -27,9 +27,12 @@ class BorrowingSerializer(serializers.ModelSerializer):
         if book.status == 'BORROWED':
             raise serializers.ValidationError('Livro já se encontra emprestado')
         
-
         if return_data <= date.today():
             raise serializers.ValidationError("A data de devolução não pode ser após a data de emprestimo")
+    
+        limit_borrowing = Borrowing.objects.filter(user=user).count()
+        
+        if limit_borrowing >= 5:
+            raise serializers.ValidationError("O limite de emprestimos de livros é 5")
+
         return data
-    
-    
