@@ -1,144 +1,95 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from datetime import timedelta
+
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .serializer import Borrowing, BorrowingSerializer
+from .models import Book
+from .serializer import BookSerializer
 
 
-class BorrowingListAPIView(APIView):
+class BookListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Listar Empréstimos",
-        description="Lista os empréstimos. Admins veem todos, usuários veem apenas os seus.",
-        responses={200: BorrowingSerializer(many=True)}
-    )
+    @extend_schema(summary="Listar Livros", description="Lista os livros. Admins veem todos; usuários também podem ver todos ou aplicar filtros no cliente.", responses={200: BookSerializer(many=True)})
     def get(self, request):
-        user = request.user
-        if user.is_staff or user.is_superuser:
-            queryset = Borrowing.objects.all()
-        else:
-            queryset = Borrowing.objects.filter(user=user)
-        serializer = BorrowingSerializer(queryset, many=True)
+        queryset = Book.objects.all()
+        serializer = BookSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class BorrowingCreateAPIView(APIView):
+
+class BookCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Realizar Empréstimo",
-        description="Registra um novo empréstimo e atualiza o status do livro para BORROWED.",
-        request=BorrowingSerializer,
-        responses={201: BorrowingSerializer}
-    )
+    @extend_schema(summary="Criar Livro", description="Cria um novo registro de livro.", request=BookSerializer, responses={201: BookSerializer})
     def post(self, request):
-        serializer = BorrowingSerializer(data=request.data, context={'request':request})
+        serializer = BookSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        borrowing_instance = serializer.save(user=request.user)
-        
-        book_instance = borrowing_instance.book
-        book_instance.status = 'BORROWED'
-        book_instance.save()
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BorrowingDetailAPIView(APIView):
+class BookDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Detalhar Empréstimo",
-        description="Retorna detalhes de um empréstimo específico.",
-        responses={200: BorrowingSerializer}
-    )
+    @extend_schema(summary="Detalhar Livro", description="Retorna detalhes de um livro específico.", responses={200: BookSerializer})
     def get(self, request, pk):
-        
         try:
-            user = request.user
-            if user.is_staff or user.is_superuser:
-                queryset = Borrowing.objects.get(pk=pk)
-            else:
-                queryset = Borrowing.objects.get(pk=pk, user=user)
-        except Borrowing.DoesNotExist:
-            raise NotFound("Emprestimo Não localizado ou você nao tem acesso a essa opção.")
-        
-        serializer = BorrowingSerializer(queryset)
+            book = Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise NotFound("Livro não localizado.")
+
+        serializer = BookSerializer(book)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class BorrowingUpdateAPIView(APIView):
+class BookUpdateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Atualizar Empréstimo",
-        description="Atualiza dados de um empréstimo existente.",
-        request=BorrowingSerializer,
-        responses={200: BorrowingSerializer}
-    )
+    @extend_schema(summary="Atualizar Livro", description="Atualiza dados de um livro existente.", request=BookSerializer, responses={200: BookSerializer})
     def patch(self, request, pk):
         try:
-            user = request.user
-            if user.is_staff or user.is_superuser:
-                queryset = Borrowing.objects.get(pk=pk)
-            else:
-                queryset = Borrowing.objects.get(pk=pk, user=user)
-        except Borrowing.DoesNotExist:
-            raise NotFound("Não é possível atualizar o emprestimo")
-        serializer = BorrowingSerializer(instance=queryset, data=request.data, partial=True, context={'request': request})
+            book = Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise NotFound("Não é possível atualizar o livro")
+        serializer = BookSerializer(instance=book, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class BorrowingRenewalAPIView(APIView):
+
+class BookChangeStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Renovar Empréstimo",
-        description="Estende a data de devolução em 7 dias, caso o livro não esteja reservado.",
-        request=None,
-        responses={200: BorrowingSerializer}
-    )
+    @extend_schema(summary="Alterar status do Livro", description="Altera o campo `status` do livro (ex.: AVAILABLE, BORROWED, RESERVED).", request=None, responses={200: BookSerializer})
     def patch(self, request, pk):
         try:
-            user = request.user
-            if user.is_staff or user.is_superuser:
-                borrowing = Borrowing.objects.get(pk=pk)
-            else:
-                borrowing = Borrowing.objects.get(pk=pk, user=user)
-        except Borrowing.DoesNotExist:
-            raise NotFound("Borrowing not found.")   
-        
-        book = borrowing.book
-        if book.status == 'RESERVED':
-            return Response({"error":"Cannot renew. This book is reserved by another user."}, status=status.HTTP_400_BAD_REQUEST)
-        borrowing.return_date += timedelta(days=7)
-        borrowing.save()
-        serializer = BorrowingSerializer(borrowing)
+            book = Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise NotFound("Livro não encontrado.")
+
+        new_status = request.data.get("status")
+        if not new_status:
+            return Response({"error": "Status do livro não definido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        book.status = new_status
+        book.save()
+        serializer = BookSerializer(book)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class BorrowingDeleteAPIView(APIView):
+
+class BookDeleteAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(
-        summary="Devolver/Excluir Empréstimo",
-        description="Remove o empréstimo e atualiza o status do livro para AVAILABLE.",
-        responses={204: None}
-    )
+    @extend_schema(summary="Excluir Livro", description="Remove o registro do livro.", responses={204: None})
     def delete(self, request, pk):
         try:
-            user = request.user
-            if user.is_staff or user.is_superuser:
-                queryset = Borrowing.objects.get(pk=pk)
-            else:
-                queryset = Borrowing.objects.get(pk=pk, user=user)
-        except Borrowing.DoesNotExist:
-            raise NotFound("Não é possível atualizar o emprestimo")
+            book = Book.objects.get(pk=pk)
+        except Book.DoesNotExist:
+            raise NotFound("Não é possível excluir o livro")
 
-        book = queryset.book
-        book.status = 'AVAILABLE'
-        book.save()
-        queryset.delete()
+        book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
