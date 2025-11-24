@@ -88,7 +88,7 @@ class BorrowingRenewalAPIView(APIView):
 
         book = borrowing.book
         if book.status == "RESERVED":
-            return Response({"error": "Cannot renew. This book is reserved by another user."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Não é possível reservar um livro já reservado por outro usuário."}, status=status.HTTP_400_BAD_REQUEST)
         borrowing.return_date += timedelta(days=7)
         borrowing.save()
         serializer = BorrowingSerializer(borrowing)

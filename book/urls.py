@@ -17,11 +17,3 @@ urlpatterns:URLPattern = [
     path("books/<uuid:pk>/status/", BookChangeStatusAPIView.as_view(), name="book-status"),
     path("books/<uuid:pk>/delete/", BookDeleteAPIView.as_view(), name="book-delete"),
 ]
-
-
-# urlpatterns: URLPattern = [
-#     path("books/", BookListCreateAPIView.as_view(), name="books_list_create"),
-#     path(
-#         "books/<pk>/", BookRetrieveUpdateDestroyAPIView.as_view(), name="books_detail"
-#     ),
-# ]
