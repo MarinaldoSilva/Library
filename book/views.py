@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Book
-from .serializer import BookSerializer
+from .serializer import BookSerializer, BookBulkSerializer
 
 
 class BookListAPIView(APIView):
@@ -14,34 +14,54 @@ class BookListAPIView(APIView):
 
     @extend_schema(summary="Listar Livros", description="Lista os livros. Admins veem todos; usuários também podem ver todos ou aplicar filtros no cliente.", responses={200: BookSerializer(many=True)})
     def get(self, request):
-        queryset = Book.objects.all()
 
-        category = request.query_params.get('category')
-        author_name = request.query_params.get('auhtor')
-        status_param = request.query_params.get('status')
-        ordering = request.query_params.get('ordering')
+        #adicionado o select_related() paRa buscaR o autor e livro na mesma consulta complexa.
+        queryset = Book.objects.select_related('author').all()
+
+        category = request.query_params.get("category")
+        author_name = request.query_params.get("auhtor")
+        status_param = request.query_params.get("status")
+
+        ordering = request.query_params.get("ordering")
 
         if category:
             queryset = queryset.filter(category__icontains=category)
-        
+
         if author_name:
             queryset = queryset.filter(author_name__icontains=author_name)
-        
+
         if status_param:
             queryset = queryset.filter(status_param__icontains=status_param)
 
-        search_validated = ['titule', 'publication_date', 'author_name']
+        search_validated = ["title", "publication_date", "author_name"]
+
         if ordering in search_validated:
             queryset = queryset.order_by(ordering)
 
         serializer = BookSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class BookBulkCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Importação em Massa de Livros",
+        description="Cria múltiplos livros de uma vez.",
+        request=BookBulkSerializer(many=True),
+        responses={201: BookBulkSerializer(many=True)}
+    )
+
+    def post(self, request):
+        serializer = BookBulkSerializer(data = request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
 class BookCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(summary="Criar Livro", description="Cria um novo registro de livro.", request=BookSerializer, responses={201: BookSerializer})
+    @extend_schema(
+            summary="Criar Livro", description="Cria um novo registro de livro.", request=BookSerializer, responses={201: BookSerializer})
     def post(self, request):
         serializer = BookSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -71,7 +91,7 @@ class BookUpdateAPIView(APIView):
         try:
             book = Book.objects.get(pk=pk)
         except Book.DoesNotExist:
-            raise NotFound("Não é possível atualizar o livro")
+            raise NotFound("Livro não localizado na base de dados.")
         serializer = BookSerializer(instance=book, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
