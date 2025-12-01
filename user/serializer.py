@@ -26,9 +26,13 @@ class UserSerializer(serializers.ModelSerializer):
             }
         }
 
+    """Cria um usuário com os dados que request.data, a função create_user recebe esse dict e com o ** é desempacotado e cria o usuário com esses dados, além disso o metodo já faz o hash da senha a mantendo criptografada."""
+
     def create(self, validated_data) -> User:
         new_user = User.objects.create_user(**validated_data)
         return new_user
+
+    """O método não faz o hash da senha, então removemos do dict, fazemos o hash com o set_password(password) e pegamos o instance.campo_db e pegamos o valor do dict com o get e adicionamos na váriavel, se não tiver esse valor no nosso dict, mantemos o valor que já vem no banco com o instance.campo_db e salvamos com o instance.save() e retornamos o instance novamente."""
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)

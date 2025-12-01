@@ -8,6 +8,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         model = Author
         fields = "__all__"
 
-        read_only_fields = ["id"]
+        read_only_fields = ("id",)  # apenas visualização
 
+        """write_only = recebe no POST, mas não é retornado no GET"""
         extra_kwargs = {"user": {"write_only": True, "required": False}}

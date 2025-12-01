@@ -18,10 +18,16 @@ class SingupAPIView(APIView):
 
     @extend_schema(summary="Registrar novo usuário", description="Cria uma nova conta de usuário no sistema.", request=UserSerializer, responses={201: inline_serializer(name="SignupResponse", fields={"Info": serializers.CharField()})})
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        paylod = request.data
+        serializer = UserSerializer(data=paylod)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"Info": "Usuário criado com sucesso"}, status=status.HTTP_201_CREATED)
+
+
+"""
+Recuperamos os  dados de email e password, verificamos se o email já existe no instance, utilizamos o check_password(password) para transformar a senha que vem em formato de texto puro em hash e fazer a comparação com o hash do banco, se valido os tokens seram gerados com o TokenObtainPairSerializer.get_token(user) para vincular o token ao usuário, e o access para acesso a aplicação nas camadas que exigem validações.E temos o retorno dos dados de acesso com os tokens.
+"""
 
 
 class SingInAPIView(APIView):
@@ -51,7 +57,7 @@ class SingInAPIView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "Usuário não cadastrado."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "E-mail não cadastrado."}, status=status.HTTP_404_NOT_FOUND)
 
         if user.check_password(password):
             refresh_token = TokenObtainPairSerializer.get_token(user)
@@ -71,6 +77,11 @@ class SingInAPIView(APIView):
             {"error": "Verifique email e senha e tente novamente."},
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+
+"""
+recuperamos o token refesh que vem no cabeçalho da request, verificamos se ele existem na resposta ep passamos o refresh token para a função TokenRefresh que vai transformar o arquivo texto puro em objeto RefreshToken para adicionar na balcklist, a resposta pode ser 205 ou 204 sem corpo de resposta
+"""
 
 
 class SingOutAPIView(APIView):

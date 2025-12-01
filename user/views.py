@@ -10,6 +10,8 @@ from .serializer import UserSerializer
 
 User = get_user_model()
 
+"""passamos o request.user no serialier contém o objeto completo de usuário (instance), é passado quando queremos ler ou ataulizar os dados, é um objeto completo do user."""
+
 
 class MyProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]

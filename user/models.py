@@ -16,6 +16,7 @@ class User(AbstractUser):
     status = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
 
+    """Na criação de um user pelo terminal, esses campos são obrigatórios"""
     REQUIRED_FIELDS = ["birth_date", "full_name"]
 
     def __str__(self):
