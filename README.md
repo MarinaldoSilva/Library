@@ -161,6 +161,77 @@ e o nosso retorno será com esse formato, porém precismos anotar o id.
 
 Agora que temos um usuário e um autor, podemos vincular um autor ao livro.
 
+### Cadastrar Livros
+
+Para cadastrar um livro ou muitos livros de uma vez.
+
+Na rota:
+
+Na rota:
+
+```http
+http://127.0.0.1:8000//api/v1/library/books/create/
+```
+
+com os dados:
+
+```json
+{
+  "title": "Clean Code",
+  "subtitle": "A Handbook of Agile Software Craftsmanship",
+  "book_description": "Even bad code can function. But if code isn't clean, it can bring a development organization to its knees.",
+  "category": "Tecnologia",
+  "publisher": "Prentice Hall",
+  "last_edition": "2008-08-01",
+  "ISBN": "978-0132350884",
+  "page_count": 464,
+  "language": "Inglês",
+  "cover_url": "https://example.com/cleancode.jpg",
+  "status": "AVAILABLE",
+  "estoque": 15,
+  "author": null
+}
+```
+
+cadastramos um livro, para cadastrar vários livro com uma única requisição:
+
+```json
+[
+  {
+    "title": "Clean Code",
+    "subtitle": "A Handbook of Agile Software Craftsmanship",
+    "book_description": "Even bad code can function. But if code isn't clean, it can bring a development organization to its knees.",
+    "category": "Tecnologia",
+    "publisher": "Prentice Hall",
+    "last_edition": "2008-08-01",
+    "ISBN": "978-0132350884",
+    "page_count": 464,
+    "language": "Inglês",
+    "cover_url": "https://example.com/cleancode.jpg",
+    "status": "AVAILABLE",
+    "estoque": 15,
+    "author": null
+  },
+  {
+    "title": "O Senhor dos Anéis: A Sociedade do Anel",
+    "subtitle": "Volume 1",
+    "book_description": "O início da grande jornada de Frodo Bolseiro para destruir o Um Anel.",
+    "category": "Fantasia",
+    "publisher": "HarperCollins",
+    "last_edition": "2019-11-25",
+    "ISBN": "978-8595084742",
+    "page_count": 576,
+    "language": "Português",
+    "cover_url": null,
+    "status": "AVAILABLE",
+    "estoque": 8,
+    "author": null
+  }
+]
+```
+
+Assim podemos cadastrar mais de um livro por vez.
+
 ### Vincular autores
 
 Na rota:
