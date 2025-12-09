@@ -10,7 +10,7 @@ class Book(models.Model):
         ("BORROWED", "Borrowed"),
         ("RESERVED", "Reserved"),
     )
-
+ 
     id = models.UUIDField(primary_key=True, default=uuid4, unique=True)
     title = models.CharField(max_length=100, null=False, blank=False)
     subtitle = models.CharField(max_length=250, null=False, blank=False)
