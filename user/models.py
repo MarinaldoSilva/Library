@@ -19,4 +19,4 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ["birth_date", "full_name"]
 
     def __str__(self):
-        return f"Usuário {self.username} criado com sucesso."
+        return f"User: {self.username} - criado com sucesso."
